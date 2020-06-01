@@ -32,19 +32,21 @@ public class UserService {
 	@Autowired
 	private PasswordHistoryRepository pwdhisRepo;
 	
-	public User loginUser(User user)
+	public Response loginUser(User user)
 	{
-		System.out.println(userRepo.findByEmailIdAndPassword(user.getEmailId(), user.getPassword()));
-		return userRepo.findByEmailIdAndPassword(user.getEmailId(), user.getPassword());
-		
+		//System.out.println(userRepo.findByEmailIdAndPassword(user.getEmailId(), user.getPassword()));
+		User u = userRepo.findByEmailIdAndPassword(user.getEmailId(), user.getPassword());
+		if(u!= null)
+		return new Response(u,"Success");
+		return new Response("Invalid emailId or password","Fail");
 	}
 
-	public String registerUser(User user) {
+	public Response registerUser(User user) {
 		String msg="";
 		
 		if (userRepo.findByEmailId(user.getEmailId())!=null)
 		{
-			return "This email id is already registered !!!";
+			return new Response("This email id is already registered !!!","fail");
 		}
 		else {
 			if(user.getRole().toString().equals("ADMIN")) {
@@ -54,26 +56,37 @@ public class UserService {
 				msg = "Dear "+user.getEmailId()+", You are registered on Online Examination Portal. "+
 						 "You can now login to "+"http://localhost:4200/login"; 
 			}
-			userRepo.save(user);
-			emailService.sendMail(user.getEmailId(), "Registration on Online Examinayion Portal !", msg);
-			return "User registered successfully !!";
+			
+		
+			
+			String mail = emailService.sendMail(user.getEmailId(), "Registration on Online Examinayion Portal !", msg);
+			if(mail.toString().equals("Success")) {
+				userRepo.save(user);
+				return new Response("User registered successfully !!","Success");
+			}else{
+				
+				 return new Response("Please provide valid email address","fail");
+			}
 		}
 	}
 
 	
 	
 	
-	public Iterable<User> getAllUsers() {
-		return userRepo.findAll();
+	public Response getAllUsers() {
+		return new Response(userRepo.findAll(),"Success");
 	}
 
-	public Optional<User> getUser(Integer userid) {
+	public Response getUser(Integer userid) {
 		Optional<User> user = userRepo.findById(userid);
-		System.out.println("In service method ");
-		return user;
+		//System.out.println("In service method ");
+		if(user!=null)
+		return new Response(user,"Success");
+		
+		return new Response("User not found !","fail");
 	}
 	
-	public String updateUser(Integer userid,User user)
+	public Response updateUser(Integer userid,User user)
 	{
 		user.setUserId(userid);
 		User u =userRepo.findByEmailId(user.getEmailId());
@@ -92,10 +105,10 @@ public class UserService {
 		pwd.setUserId(userRepo.findById(pwdhis.getUserId()).get());
 //		System.out.println(pwdhisRepo.findById(pwdhis.getUserId()));
 		pwdhisRepo.save(pwd);
-		return "User details updated successfully";
+		return new Response("User details updated successfully","Success");
 	}
 
-	public int forgotPassword(String email) {
+	public Response forgotPassword(String email) {
 			User user=userRepo.findByEmailId(email);
 		if( user != null)
 		{
@@ -119,10 +132,9 @@ public class UserService {
 			
 			emailService.sendMail(email,"Reset password mail","Your temporary password is "+otp+". Change your password after login.");
 			
-			return 1;
+			return new Response("OTP sent to your email id", "Success");
 		}
-		return 0;
-	}
+		return new Response("Please enter valid email address", "Success");	}
 	
 	public Response validateOtp(String email, String otp)
 	{
@@ -146,7 +158,7 @@ public class UserService {
 		return new Response("OTP is not Created", "Fail");
 	}
 
-	public String updatePassword(User user) {
+	public Response updatePassword(User user) {
 	
 		
 		
@@ -169,6 +181,6 @@ public class UserService {
 		pwd.setUserId(userRepo.findById(pwdhis.getUserId()).get());
 //		System.out.println(pwdhisRepo.findById(pwdhis.getUserId()));
 		pwdhisRepo.save(pwd);
-		return "User password updated successfully";
+		return new Response("User password updated successfully","Success");
 	}
 }

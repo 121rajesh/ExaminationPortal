@@ -11,7 +11,7 @@ public class EmailService {
 	@Autowired
 	JavaMailSender emailSender;
 	
-	public 	void sendMail(String toEmail, String subject, String message)
+	public 	String sendMail(String toEmail, String subject, String message)
 	{
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		
@@ -19,7 +19,14 @@ public class EmailService {
 		mailMessage.setSubject(subject);
 		mailMessage.setText(message);
 		
-		emailSender.send(mailMessage);
-	
+		try 
+		{
+			emailSender.send(mailMessage);
+			return "Success";
+		}
+		catch(Exception e)
+		{
+			return "fail";
+		}
 	}
 }
