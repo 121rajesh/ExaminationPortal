@@ -33,7 +33,7 @@ public class UserController {
 	public Response register(@RequestBody User user)
 	{
 		
-		return new Response(userService.registerUser(user),"Sucess");
+		return userService.registerUser(user);
 	}
 	
 	@PostMapping("/login")
@@ -41,9 +41,7 @@ public class UserController {
 	{
 		
 		System.out.println(user.getEmailId());
-		if(userService.loginUser(user) != null)
-		return new Response(userService.loginUser(user),"Success");
-		return new Response("Invalid emailId or password","Fail");
+		return userService.loginUser(user);
 	}
 
 	@GetMapping("/userdetails/{userid}")
@@ -64,19 +62,13 @@ public class UserController {
 	@PostMapping("/changepassword")
 	public Response changePassword(@RequestBody User user)
 	{
-		return new Response(userService.updatePassword(user),"Success");
+		return userService.updatePassword(user);
 	}
 	
 	@PostMapping("/forgotpassword")
 	public Response resetPassword(@RequestBody User user)
 	{
-		if(userService.forgotPassword(user.getEmailId())==1)
-		{
-			return new Response("Temporary password sent to your email id", "Success");
-		}
-		else {
-			return new Response("Please enter valid email address", "Success");
-		}
+		return userService.forgotPassword(user.getEmailId());
 	}
 	
 	@PostMapping("/validateotp")
